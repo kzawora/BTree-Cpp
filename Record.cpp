@@ -8,20 +8,26 @@
 #define DIST_LOWER_LIMIT -10
 #define DIST_UPPER_LIMIT 10
 class Record {
+	int index;
 	std::vector<double> values;
 public:
 	Record() = default;
-	Record(std::vector<double> vals) {
+	Record(int _index, std::vector<double> vals) : index(_index) {
 		for (size_t i = 0; i < MAX_RECORD_SIZE; i++) {
 			if (i < vals.size()) values.push_back(vals[i]);
 			else values.push_back(std::nan(0));
 		}
 	}
 	void print() {
-		std::cout << "RECORD: ";
-		for (auto i = values.begin(); i != values.end(); ++i)
-			std::cout << *i << ' ';
-		std::cout << std::endl;
+		std::cout << *this << std::endl;
+	}
+
+	friend std::ostream& operator<<(std::ostream& stream, const Record& record) {
+		stream << "RECORD " << record.index << ": ";
+		for (auto i = record.values.begin(); i != record.values.end(); ++i)
+			if (!std::isnan(*i))
+				stream << *i << ' ';
+		return stream;
 	}
 
 	static Record generate() {

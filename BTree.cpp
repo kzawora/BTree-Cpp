@@ -102,13 +102,26 @@ namespace BTree {
 		static BTreeNode deserialize(/*arg*/) {}
 	};
 
+	class BTreeMetadata {
+	public:
+		int element{ 0 };
+		int nodes{ 1 };
+		int height{ 1 };
+		int root{ 0 };
+		int btree_next_node{ 0 };
+		std::vector<BTreeNode*> btree_free_nodes;
+	};
+
 	class BTree {
+		BTreeMetadata metadata;
 		BTree() {}
 		~BTree() {}
 
 		void flush() {}
 
-		BTreeNode createTree() {}
+		BTreeNode createTree() {
+
+		}
 
 	};
 }
