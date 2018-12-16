@@ -1,10 +1,10 @@
 #include "BTree.cpp"
 #include "Record.cpp"
+#include "Storage.cpp"
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <iterator>
-
 #pragma once
 int shell_cmd(std::string cmd) {
 	if (cmd == "") {
@@ -68,11 +68,45 @@ int main() {
 		r.print();
 	}*/
 	std::string input;
+	Storage * st = new Storage("file2.bin", 16);
+	bytearray* data = new bytearray(16);
+
+//	st->clear();
+
+	for (int i = 0; i < 30; i++)
+		st->setPage(i, data);
+	
+	data->arr[3] = 'a';
+	data->arr[2] = 'p';
+	data->arr[1] = 'u';
+	data->arr[0] = 'd';
+
+	st->setPage(1, data);
+
+	st->setPage(29, data);
+
+	data->arr[0] = 'z';
+	st->setPage(3, data);
+
+	bytearray* read = st->getPage(1);
+	std::cout << read->arr << std::endl;
+	delete read;
+	read = st->getPage(3);
+	std::cout << read->arr;
+	delete read;
+	
+	st->setPage(0, data);
+
+	delete st;
+	delete data;
+
+	/*
 	while (true) {
 		std::cout << "> ";
 		getline(std::cin, input);
 		int status = shell_cmd(input);
 		if (status == -1) break;
 	}
+	*/
 	return 0;
 }

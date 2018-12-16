@@ -4,6 +4,7 @@
 #include <random>
 #include <ctime>
 #include "Utils.cpp"
+#pragma once
 
 #define MAX_RECORD_SIZE 15
 #define DIST_LOWER_LIMIT -10
@@ -46,5 +47,6 @@ public:
 	bytearray* serialize() {
 		
 	}
+
 	static Record deserialize(/*arg*/) {}
 };
