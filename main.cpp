@@ -62,20 +62,16 @@ int shell_cmd(std::string cmd) {
 	return 0;
 }
 
-int main() {
-	/*	for (int i = 0; i < 10; i++) {
-		Record r = Record::generate();
-		r.print();
-	}*/
+void storageTest() {
 	std::string input;
 	Storage * st = new Storage("file2.bin", 16);
 	bytearray* data = new bytearray(16);
 
-//	st->clear();
+	//	st->clear();
 
 	for (int i = 0; i < 30; i++)
 		st->setPage(i, data);
-	
+
 	data->arr[3] = 'a';
 	data->arr[2] = 'p';
 	data->arr[1] = 'u';
@@ -94,11 +90,29 @@ int main() {
 	read = st->getPage(3);
 	std::cout << read->arr;
 	delete read;
-	
+
 	st->setPage(0, data);
 
 	delete st;
 	delete data;
+}
+int main() {
+	/*	for (int i = 0; i < 10; i++) {
+		Record r = Record::generate();
+		r.print();
+	}*/
+	
+	BTreeStorage * storage = new BTreeStorage("file3");
+	storage->clear();
+	BTree::BTreeNode* node = new BTree::BTreeNode();
+	node->parent = 1;
+	BTree::BTreeNodeCell * cell = new BTree::BTreeNodeCell(2,3,4);
+	node->insert(cell);
+	node->insert(cell);
+	storage->set(0, node);
+	storage->set(1, node);
+	storage->set(2, node);
+	BTree::BTreeNode * node2 = storage->get(1);
 
 	/*
 	while (true) {

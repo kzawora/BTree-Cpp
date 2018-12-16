@@ -11,7 +11,7 @@ class Storage {
 	std::fstream file;
 public:
 	Storage(std::string _name, int _pagesize) : filename(_name), pagesize(_pagesize) {
-		std::ifstream file_temp(filename, std::fstream::in | std::fstream::out | std::ios::binary | std::ios::ate);
+		std::ifstream file_temp(filename, std::fstream::in | std::fstream::out | std::ios::app | std::ios::binary | std::ios::ate);
 		filesize = static_cast<size_t>(file_temp.tellg());
 		file_temp.close();
 		file.open(filename, std::ios::in | std::ios::binary | std::ios::out | std::ios::ate);
@@ -34,11 +34,13 @@ public:
 		if (index > pages)
 			throw "Index out of bounds!";
 		file.seekg(index * pagesize, std::ios::beg);
-		bytearray* arr = new bytearray(pagesize);
+		bytearray* arr = new bytearray(pagesize); // deleted by user
 		file.read(arr->arr, pagesize);
 		return arr;
 	}
-
+	void flush() {
+		file.flush();
+	}
 	void setPage(int index, bytearray* data) {
 
 		if (index > pages)
@@ -64,21 +66,50 @@ public:
 
 class BTreeStorage {
 	Storage * storage;
-	int nextnode, freenodes;
+	int nextnode;
 	std::vector<int> freenodes;
 	bytearray* page;
-
+public:
 	BTreeStorage(std::string name) {
 		name.append(".btree");
-		storage = new Storage(name, BTREE_PAGE_SIZE);
+		storage = new Storage(name, BTREE_PAGE_SIZE);	// deleted in destructor
 		nextnode = storage->getPageCount();
 	}
 	~BTreeStorage() {
 		delete storage;
 	}
-	BTree::BTreeNode get() {};
-	void set(int index, BTree::BTreeNode) {
-	//	if()
+	void clear() {
+		storage->clear();
+		nextnode = 0;
+		freenodes.clear();
+	}
+	BTree::BTreeNode* get(int index) {
+		bytearray* page = storage->getPage(index);
+		BTree::BTreeNode * node = BTree::BTreeNode::deserialize(page, index);
+		delete page;
+		return node;
+	};
+	void set(int index, BTree::BTreeNode* node) {
+		if (nextnode == index) {
+			nextnode++;
+		}
+		storage->setPage(index, node->serialize());
+	}
+
+	BTree::BTreeNode* newNode() {
+		int index;
+		if (freenodes.size() > 0) {
+			index = freenodes.back();
+			freenodes.pop_back();
+		}
+		else
+			index = nextnode;
+		BTree::BTreeNode * node = new BTree::BTreeNode(index); // deleted by user
+		set(index, node);
+		return node;
+	}
+	void flush() {
+		storage->flush();
 	}
 };
 
