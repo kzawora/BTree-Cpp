@@ -3,6 +3,7 @@
 #include <iostream>
 #include <random>
 #include <ctime>
+#include "Utils.cpp"
 
 #define MAX_RECORD_SIZE 15
 #define DIST_LOWER_LIMIT -10
@@ -42,6 +43,8 @@ public:
 		return r;
 	}
 
-	char* /*bytearray*/ serialize() {}
+	bytearray* serialize() {
+		
+	}
 	static Record deserialize(/*arg*/) {}
 };
