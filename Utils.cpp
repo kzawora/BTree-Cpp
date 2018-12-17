@@ -7,14 +7,9 @@
 #define MAX_SIZE ~(1 << 31)
 
 class bytearray {
-public:
-	char* arr;
-	int size;
-	bytearray(int _size) : size(_size) {
-		arr = new char[_size] {};
-	}
-	~bytearray() {
-		delete[] arr;
-	}
+  public:
+    char* arr;
+    int size;
+    bytearray(int _size) : size(_size) { arr = new char[_size]{}; }
+    ~bytearray() { delete[] arr; }
 };
-

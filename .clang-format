@@ -1,0 +1,13 @@
+﻿---
+BasedOnStyle: LLVM
+AlignTrailingComments: 'true'
+ColumnLimit: '120'
+Cpp11BracedListStyle: 'true'
+IndentWidth: '4'
+PointerAlignment: Left
+SpacesInContainerLiterals: 'false'
+SpacesInParentheses: 'false'
+Standard: Cpp11
+UseTab: Never
+
+...
