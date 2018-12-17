@@ -1,4 +1,5 @@
 #include "BTree.cpp"
+#include "Record.cpp"
 #include "Utils.cpp"
 #include <fstream>
 #include <string>
@@ -35,9 +36,12 @@ class Storage {
     std::shared_ptr<bytearray> getPage(int index) {
         if (index > pages)
             throw "Index out of bounds!";
-        file.seekg(index * pagesize, std::ios::beg);
-        std::shared_ptr<bytearray> arr = std::make_shared<bytearray>(pagesize); // deleted by user
-        file.read(arr->arr, pagesize);
+
+        std::shared_ptr<bytearray> arr = std::make_shared<bytearray>(pagesize);
+        if (pages > 0) {
+            file.seekg(index * pagesize, std::ios::beg);
+            file.read(arr->arr, pagesize);
+        }
         return arr;
     }
     void flush() { file.flush(); }
@@ -70,7 +74,7 @@ class BTreeStorage {
   public:
     BTreeStorage(std::string name) {
         name.append(".btree");
-        storage = std::make_shared<Storage>(name, BTREE_PAGE_SIZE); // deleted in destructor
+        storage = std::make_shared<Storage>(name, BTREE_PAGE_SIZE);
         nextnode = storage->getPageCount();
     }
     ~BTreeStorage() = default;
@@ -98,11 +102,44 @@ class BTreeStorage {
             freenodes.pop_back();
         } else
             index = nextnode;
-        std::shared_ptr<BTree::BTreeNode> node = std::make_shared<BTree::BTreeNode>(index); // deleted by user
+        std::shared_ptr<BTree::BTreeNode> node = std::make_shared<BTree::BTreeNode>(index);
         set(index, node);
         return node;
     }
     void flush() { storage->flush(); }
 };
 
-class DataStorage {};
+class DataStorage {
+    std::shared_ptr<Storage> storage;
+    int nextpage, nextoffset;
+
+  public:
+    DataStorage(std::string name) : nextoffset(0) {
+        name.append(".data");
+        storage = std::make_shared<Storage>(name, RECORD_PAGE_SIZE);
+        nextpage = storage->getPageCount();
+    }
+    void clear() {
+        storage->clear();
+        nextpage = 0;
+        nextoffset = 0;
+    }
+    std::shared_ptr<Record> get(int pageNo, int offset) {
+        std::shared_ptr<bytearray> page = storage->getPage(pageNo);
+		std::shared_ptr<bytearray> recordData = std::make_shared<bytearray>(RECORD_SIZE);
+        memcpy(recordData->arr, page->arr + offset, RECORD_SIZE);
+        return Record::deserialize(recordData);
+    }
+    // TODO: poprawic to
+    void set(int pageNo, int offset, std::shared_ptr<Record> rec) {
+        std::shared_ptr<bytearray> page = storage->getPage(pageNo);
+        std::shared_ptr<bytearray> recordData = rec->serialize();
+        if (page == nullptr) {
+            page = std::make_shared<bytearray>(RECORD_PAGE_SIZE);
+        }
+        memcpy(page->arr + offset, recordData->arr, RECORD_SIZE);
+        storage->setPage(pageNo, page);
+    }
+    void insert() {}
+    void flush() { storage->flush(); }
+};

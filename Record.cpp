@@ -6,9 +6,7 @@
 #include <vector>
 #pragma once
 
-#define MAX_RECORD_SIZE 15
-#define DIST_LOWER_LIMIT -10
-#define DIST_UPPER_LIMIT 10
+
 class Record {
     int index;
     std::vector<double> values;
@@ -33,8 +31,8 @@ class Record {
         return stream;
     }
 
-    static Record* generate() {
-        Record* r = new Record();
+    static std::shared_ptr<Record> generate() {
+        std::shared_ptr<Record> r = std::make_shared<Record>();
         std::default_random_engine gen(static_cast<unsigned int>(clock())); // clock()
         std::uniform_real_distribution<double> dist(DIST_LOWER_LIMIT, DIST_UPPER_LIMIT);
         auto generator = [&]() { return dist(gen); };
@@ -44,7 +42,7 @@ class Record {
         return r;
     }
 
-    bytearray* serialize() {
+    std::shared_ptr<bytearray> serialize() {
         std::vector<double> data;
         int dummies = MAX_RECORD_SIZE - values.size();
         for (auto value : values) {
@@ -53,11 +51,19 @@ class Record {
         for (int i = 0; i < dummies; i++) {
             data.push_back(std::nan(0));
         }
-        bytearray* arr = new bytearray(sizeof(int) + MAX_RECORD_SIZE * sizeof(double));
+        std::shared_ptr<bytearray> arr = std::make_shared<bytearray>(RECORD_SIZE);
         memcpy(arr->arr, &index, sizeof(int));
         memcpy(arr->arr + sizeof(int), &data[0], MAX_RECORD_SIZE * sizeof(double));
         return arr;
     }
 
-    static Record* deserialize(bytearray* data) {}
+    static std::shared_ptr<Record> deserialize(std::shared_ptr<bytearray> data) {
+        int index = 0;
+        double numbers[MAX_RECORD_SIZE];
+        memcpy(&index, data->arr, sizeof(int));
+        memcpy(&numbers, data->arr + sizeof(int), MAX_RECORD_SIZE * sizeof(double));
+        std::vector<double> dataVec(numbers, numbers + sizeof(numbers) / sizeof(numbers[0]));
+        std::shared_ptr<Record> newRecord = std::make_shared<Record>(index, dataVec);
+        return newRecord;
+	}
 };

@@ -5,6 +5,12 @@
 #define BTREE_ELEMENTS_PER_PAGE (BTREE_2D + 2) // BTREE_2D keys per page + 1 for final child pointer + 1 for overflows.
 #define BTREE_PAGE_SIZE ((BTREE_ELEMENTS_PER_PAGE * 4) + 1) * 4
 #define MAX_SIZE ~(1 << 31)
+#define RECORDS_PER_PAGE (8)
+#define RECORD_SIZE (sizeof(int) + MAX_RECORD_SIZE * sizeof(double))
+#define RECORD_PAGE_SIZE (RECORDS_PER_PAGE * RECORD_SIZE)
+#define MAX_RECORD_SIZE (15)
+#define DIST_LOWER_LIMIT (-10)
+#define DIST_UPPER_LIMIT (10)
 
 class bytearray {
   public:
