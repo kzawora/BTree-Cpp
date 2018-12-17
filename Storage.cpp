@@ -30,18 +30,18 @@ public:
 		file.open(filename, std::ios::in | std::ios::binary | std::ios::out | std::ios::ate);
 		pages = 0;
 	}
-	bytearray* getPage(int index) {
+	std::shared_ptr <bytearray> getPage(int index) {
 		if (index > pages)
 			throw "Index out of bounds!";
 		file.seekg(index * pagesize, std::ios::beg);
-		bytearray* arr = new bytearray(pagesize); // deleted by user
+		std::shared_ptr <bytearray> arr = std::make_shared<bytearray>(pagesize); // deleted by user
 		file.read(arr->arr, pagesize);
 		return arr;
 	}
 	void flush() {
 		file.flush();
 	}
-	void setPage(int index, bytearray* data) {
+	void setPage(int index, std::shared_ptr <bytearray> data) {
 
 		if (index > pages)
 			throw "Index too big!";
@@ -65,38 +65,35 @@ public:
 };
 
 class BTreeStorage {
-	Storage * storage;
+	std::shared_ptr<Storage> storage;
 	int nextnode;
 	std::vector<int> freenodes;
-	bytearray* page;
+	std::shared_ptr <bytearray> page;
 public:
 	BTreeStorage(std::string name) {
 		name.append(".btree");
-		storage = new Storage(name, BTREE_PAGE_SIZE);	// deleted in destructor
+		storage = std::make_shared<Storage>(name, BTREE_PAGE_SIZE);	// deleted in destructor
 		nextnode = storage->getPageCount();
 	}
-	~BTreeStorage() {
-		delete storage;
-	}
+	~BTreeStorage() = default;
 	void clear() {
 		storage->clear();
 		nextnode = 0;
 		freenodes.clear();
 	}
-	BTree::BTreeNode* get(int index) {
-		bytearray* page = storage->getPage(index);
-		BTree::BTreeNode * node = BTree::BTreeNode::deserialize(page, index);
-		delete page;
+	std::shared_ptr<BTree::BTreeNode> get(int index) {
+		std::shared_ptr<bytearray> page = storage->getPage(index);
+		std::shared_ptr <BTree::BTreeNode> node = BTree::BTreeNode::deserialize(page, index);
 		return node;
 	};
-	void set(int index, BTree::BTreeNode* node) {
+	void set(int index, std::shared_ptr <BTree::BTreeNode> node) {
 		if (nextnode == index) {
 			nextnode++;
 		}
 		storage->setPage(index, node->serialize());
 	}
 
-	BTree::BTreeNode* newNode() {
+	std::shared_ptr<BTree::BTreeNode> newNode() {
 		int index;
 		if (freenodes.size() > 0) {
 			index = freenodes.back();
@@ -104,7 +101,7 @@ public:
 		}
 		else
 			index = nextnode;
-		BTree::BTreeNode * node = new BTree::BTreeNode(index); // deleted by user
+		std::shared_ptr<BTree::BTreeNode> node = std::make_shared<BTree::BTreeNode>(index); // deleted by user
 		set(index, node);
 		return node;
 	}

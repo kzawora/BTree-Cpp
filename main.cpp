@@ -61,7 +61,7 @@ int shell_cmd(std::string cmd) {
 	}
 	return 0;
 }
-
+/*
 void storageTest() {
 	std::string input;
 	Storage * st = new Storage("file2.bin", 16);
@@ -96,23 +96,24 @@ void storageTest() {
 	delete st;
 	delete data;
 }
+*/
 int main() {
 	/*	for (int i = 0; i < 10; i++) {
 		Record r = Record::generate();
 		r.print();
 	}*/
-	
-	BTreeStorage * storage = new BTreeStorage("file3");
+
+	std::shared_ptr < BTreeStorage> storage = std::make_shared<BTreeStorage>("file3");
 	storage->clear();
-	BTree::BTreeNode* node = new BTree::BTreeNode();
+	std::shared_ptr < BTree::BTreeNode> node = std::make_shared<BTree::BTreeNode>();
 	node->parent = 1;
-	BTree::BTreeNodeCell * cell = new BTree::BTreeNodeCell(2,3,4);
+	std::shared_ptr <BTree::BTreeNodeCell> cell = std::make_shared<BTree::BTreeNodeCell>(2, 3, 4);
 	node->insert(cell);
 	node->insert(cell);
 	storage->set(0, node);
 	storage->set(1, node);
 	storage->set(2, node);
-	BTree::BTreeNode * node2 = storage->get(1);
+	std::shared_ptr < BTree::BTreeNode> node2 = storage->get(1);
 
 	/*
 	while (true) {

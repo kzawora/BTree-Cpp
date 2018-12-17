@@ -32,21 +32,34 @@ public:
 		return stream;
 	}
 
-	static Record generate() {
-		Record r;
+	static Record* generate() {
+		Record *r = new Record();
 		std::default_random_engine gen(static_cast<unsigned int>(clock())); // clock()
 		std::uniform_real_distribution<double> dist(DIST_LOWER_LIMIT,
 			DIST_UPPER_LIMIT);
 		auto generator = [&]() { return dist(gen); };
 		for (int i = 0; i < MAX_RECORD_SIZE; i++) {
-			r.values.push_back(generator());
+			r->values.push_back(generator());
 		}
 		return r;
 	}
 
 	bytearray* serialize() {
-		
+		std::vector<double> data;
+		int dummies = MAX_RECORD_SIZE - values.size();
+		for (auto value : values) {
+			data.push_back(value);
+		}
+		for (int i = 0; i < dummies; i++) {
+			data.push_back(std::nan(0));
+		}
+		bytearray * arr = new bytearray(sizeof(int) + MAX_RECORD_SIZE * sizeof(double));
+		memcpy(arr->arr, &index, sizeof(int));
+		memcpy(arr->arr + sizeof(int), &data[0], MAX_RECORD_SIZE * sizeof(double));
+		return arr;
 	}
 
-	static Record deserialize(/*arg*/) {}
+	static Record* deserialize(bytearray* data) {
+
+	}
 };
