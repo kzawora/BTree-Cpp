@@ -37,11 +37,12 @@ public:
 
 class BTreeStorage {
     std::shared_ptr<Storage> storage;
-    int nextnode;
     std::vector<int> freenodes;
     std::shared_ptr<bytearray> page;
 
 public:
+    int nextnode;
+
     BTreeStorage(std::string name);
 
     ~BTreeStorage() = default;
@@ -59,9 +60,10 @@ public:
 
 class DataStorage {
     std::shared_ptr<Storage> storage;
-    int nextpage, nextoffset;
 
 public:
+    int nextpage, nextoffset;
+
     DataStorage(std::string name);
 
     void clear();

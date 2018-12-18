@@ -11,6 +11,12 @@
 #include <memory>
 #include "Record.h"
 
+class Storage;
+
+class DataStorage;
+
+class BTreeStorage;
+
 namespace BTreeNS {
     class BTreeNodeCell {
         int key;
@@ -77,19 +83,56 @@ namespace BTreeNS {
     };
 
     class BTree {
-        std::shared_ptr<BTreeMetadata> metadata;
-//    std::shared_ptr<DataStorage> data;
-//    std::shared_ptr<BTreeStorage> btree;
+//        std::shared_ptr<BTreeMetadata> metadata;
+        std::shared_ptr<DataStorage> data;
+        std::shared_ptr<BTreeStorage> btree;
+        std::string name;
+        std::vector<int> metadata;
+        std::shared_ptr<Storage> metadataStorage;
 
-        BTree();
+    public:
+        BTree(std::string _name);
 
         ~BTree();
 
         void flush();
 
+        void loadMetadata();
+
+        void flushMetadata();
+
+        void syncMetadataStorage();
+
+        std::shared_ptr<BTreeNode> createTree();
+
+        std::shared_ptr<BTreeNode> newNode();
+
+        std::tuple<std::shared_ptr<BTreeNode>, bool> getNodeForKey(int key, bool test = true);
+
+        void insertCellIntoNode(std::shared_ptr<BTreeNodeCell> cell, std::shared_ptr<BTreeNode> node);
+
+        std::vector<int> getSiblings(std::shared_ptr<BTreeNode> node);
+
+        bool compensate(std::shared_ptr<BTreeNode> node);
+
+        void rotateNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2);
+
+        void splitNode(std::shared_ptr<BTreeNode>);
+
+        void rebalance(std::shared_ptr<BTreeNode> node);
+
+        void mergeNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2);
+
+        void repairNodeAfterDeletion(std::shared_ptr<BTreeNode> node);
+
+        void deleteKeyFromNode(int key, std::shared_ptr<BTreeNode> node);
+
+        std::shared_ptr<Record> get(int key);
+
         void set(int key, std::shared_ptr<Record> rec);
 
-        BTreeNode createTree();
+        void del(int key);
+
     };
 } // namespace BTreeNS
 #endif //SBD2_BTREE_H
