@@ -102,6 +102,27 @@ void btreetest() {
     storage->set(2, node);
     std::shared_ptr<BTree::BTreeNode> node2 = storage->get(1);
 }
+void datatest() {
+    std::shared_ptr<DataStorage> storage = std::make_shared<DataStorage>("file");
+    storage->clear();
+    std::vector<double> data = {1, 2, 3, 4, 5, 6};
+    std::shared_ptr<Record> rec = std::make_shared<Record>(1, data);
+    /*    storage->set(0, 0, rec);
+        storage->set(0, RECORD_SIZE, rec);
+        storage->set(0, 7 * RECORD_SIZE, rec);
+        storage->set(1, 1 * RECORD_SIZE, rec);
+        storage->set(2, 1 * RECORD_SIZE, rec);
+            */
+    auto rec1 = Record::generate(), rec2 = Record::generate(), rec3 = Record::generate();
+    for (int i = 0; i < 9; i++) {
+        storage->insert(rec1);
+        storage->flush();	
+	}
+    auto val1 = storage->get(0, 0);
+
+    storage->flush();
+    std::shared_ptr<Record> node2 = storage->get(0, RECORD_SIZE);
+}
 int main() {
     /*	for (int i = 0; i < 10; i++) {
         Record r = Record::generate();
@@ -110,17 +131,8 @@ int main() {
     /*
 
         */
-    std::shared_ptr<DataStorage> storage = std::make_shared<DataStorage>("file");
-    storage->clear();
-    std::vector<double> data = {1, 2, 3, 4, 5, 6};
-    std::shared_ptr<Record> rec = std::make_shared<Record>(1, data);
-    storage->set(0, 0, rec);
-    storage->set(0, RECORD_SIZE, rec);
-    storage->set(0, 2 * RECORD_SIZE, rec);
-    storage->flush();
-    std::shared_ptr<Record> node2 = storage->get(0,RECORD_SIZE);
-
-
+    btreetest();
+    datatest();
     /*
     while (true) {
         std::cout << "> ";

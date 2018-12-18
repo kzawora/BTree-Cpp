@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <tuple>
 #pragma once
 
 class Storage {
@@ -126,20 +127,32 @@ class DataStorage {
     }
     std::shared_ptr<Record> get(int pageNo, int offset) {
         std::shared_ptr<bytearray> page = storage->getPage(pageNo);
-		std::shared_ptr<bytearray> recordData = std::make_shared<bytearray>(RECORD_SIZE);
+        std::shared_ptr<bytearray> recordData = std::make_shared<bytearray>(RECORD_SIZE);
         memcpy(recordData->arr, page->arr + offset, RECORD_SIZE);
         return Record::deserialize(recordData);
     }
     // TODO: poprawic to
     void set(int pageNo, int offset, std::shared_ptr<Record> rec) {
-        std::shared_ptr<bytearray> page = storage->getPage(pageNo);
+        std::shared_ptr<bytearray> page;
         std::shared_ptr<bytearray> recordData = rec->serialize();
-        if (page == nullptr) {
+        if (storage->getPageCount() == pageNo) {
             page = std::make_shared<bytearray>(RECORD_PAGE_SIZE);
+        } else {
+            page = storage->getPage(pageNo);
         }
         memcpy(page->arr + offset, recordData->arr, RECORD_SIZE);
         storage->setPage(pageNo, page);
     }
-    void insert() {}
+    std::tuple<int, int> insert(std::shared_ptr<Record> rec) {
+        int page = nextpage;
+        int offset = nextoffset; 
+        nextoffset += RECORD_SIZE;
+        if (nextoffset == RECORD_PAGE_SIZE) {
+            nextpage++;
+            nextoffset = 0;
+        }
+        set(page, offset, rec);
+        return std::tuple<int, int>(page, offset);
+    }
     void flush() { storage->flush(); }
 };
