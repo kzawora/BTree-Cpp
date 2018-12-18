@@ -1,11 +1,11 @@
-#include "BTree.cpp"
-#include "Record.cpp"
-#include "Storage.cpp"
+#include "headers/BTree.h"
+#include "headers/Record.h"
+#include "headers/Storage.h"
 #include <iostream>
 #include <iterator>
 #include <sstream>
 #include <string>
-#pragma once
+
 int shell_cmd(std::string cmd) {
     if (cmd == "") {
         std::cout << "You need to type a command." << std::endl;
@@ -53,6 +53,7 @@ int shell_cmd(std::string cmd) {
     }
     return 0;
 }
+
 /*
 void storageTest() {
     std::string input;
@@ -92,16 +93,17 @@ void storageTest() {
 void btreetest() {
     std::shared_ptr<BTreeStorage> storage = std::make_shared<BTreeStorage>("file3");
     storage->clear();
-    std::shared_ptr<BTree::BTreeNode> node = std::make_shared<BTree::BTreeNode>();
+    std::shared_ptr<BTreeNS::BTreeNode> node = std::make_shared<BTreeNS::BTreeNode>();
     node->parent = 1;
-    std::shared_ptr<BTree::BTreeNodeCell> cell = std::make_shared<BTree::BTreeNodeCell>(2, 3, 4);
+    std::shared_ptr<BTreeNS::BTreeNodeCell> cell = std::make_shared<BTreeNS::BTreeNodeCell>(2, 3, 4);
     node->insert(cell);
     node->insert(cell);
     storage->set(0, node);
     storage->set(1, node);
     storage->set(2, node);
-    std::shared_ptr<BTree::BTreeNode> node2 = storage->get(1);
+    std::shared_ptr<BTreeNS::BTreeNode> node2 = storage->get(1);
 }
+
 void datatest() {
     std::shared_ptr<DataStorage> storage = std::make_shared<DataStorage>("file");
     storage->clear();
@@ -115,14 +117,15 @@ void datatest() {
             */
     auto rec1 = Record::generate(), rec2 = Record::generate(), rec3 = Record::generate();
     for (int i = 0; i < 9; i++) {
-        storage->insert(rec1);
-        storage->flush();	
-	}
+        storage->insert(Record::generate());
+        storage->flush();
+    }
     auto val1 = storage->get(0, 0);
 
     storage->flush();
     std::shared_ptr<Record> node2 = storage->get(0, RECORD_SIZE);
 }
+
 int main() {
     /*	for (int i = 0; i < 10; i++) {
         Record r = Record::generate();

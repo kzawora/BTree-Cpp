@@ -1,5 +1,7 @@
+#ifndef SBD2_COMMONHEADER_H
+#define SBD2_COMMONHEADER_H
+
 // funkcje pomocnicze, np wizualizacja drzewa
-#pragma once
 #define BTREE_D (2)
 #define BTREE_2D (2 * BTREE_D)
 #define BTREE_ELEMENTS_PER_PAGE (BTREE_2D + 2) // BTREE_2D keys per page + 1 for final child pointer + 1 for overflows.
@@ -13,9 +15,13 @@
 #define DIST_UPPER_LIMIT (10)
 
 class bytearray {
-  public:
-    char* arr;
+public:
+    char *arr;
     int size;
+
     bytearray(int _size) : size(_size) { arr = new char[_size]{}; }
+
     ~bytearray() { delete[] arr; }
 };
+
+#endif
