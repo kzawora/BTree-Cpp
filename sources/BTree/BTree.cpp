@@ -100,6 +100,16 @@ std::vector<int> BTree::getSiblings(std::shared_ptr<BTreeNode> node) {
 }
 
 bool BTree::compensate(std::shared_ptr<BTreeNode> node) {
+    auto siblings = getSiblings(node);
+    for (auto item : siblings) {
+        if (item == MAX_SIZE)
+            continue;
+        auto node2 = btree->get(item);
+        if (BTREE_2D <= node->size() + node2->size() && node->size() + node2->size() <= BTREE_2D*2){
+            rotateNodes(node, node2);
+            return true;
+        }
+    }
     return false;
 }
 
@@ -131,7 +141,7 @@ std::shared_ptr<Record> BTree::get(int key) {
 }
 
 void BTree::set(int key, std::shared_ptr<Record> rec) {
-
+    auto tup = getNodeForKey;
 }
 
 void BTree::del(int key) {
