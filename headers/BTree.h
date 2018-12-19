@@ -1,7 +1,3 @@
-//
-// Created by Konrad on 18.12.2018.
-//
-
 #ifndef SBD2_BTREE_H
 #define SBD2_BTREE_H
 

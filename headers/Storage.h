@@ -1,7 +1,3 @@
-//
-// Created by Konrad on 18.12.2018.
-//
-
 #ifndef SBD2_STORAGE_H
 #define SBD2_STORAGE_H
 

@@ -1,7 +1,3 @@
-//
-// Created by Konrad on 18.12.2018.
-//
-
 #ifndef SBD2_RECORD_H
 #define SBD2_RECORD_H
 

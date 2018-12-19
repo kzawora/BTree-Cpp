@@ -53,6 +53,7 @@ std::shared_ptr<BTreeNodeCell> BTreeNode::getCellByChild(int _cell) {
         if (cell->getChild() == _cell)
             return cell;
     }
+    return nullptr;
 }
 
 // TODO

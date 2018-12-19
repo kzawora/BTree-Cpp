@@ -29,7 +29,7 @@ void BTree::flushMetadata() {
     metadata[5] = data->nextoffset; // data_next_offset
     metadata[6] = btree->nextnode; // btree_next_node
     // zapisywanie metadanych do bytearray;
-    metadataStorage->setPage(0,)
+//  metadataStorage->setPage(0,)
 }
 
 void BTree::syncMetadataStorage() {
@@ -66,11 +66,37 @@ std::tuple<std::shared_ptr<BTreeNode>, bool> BTree::getNodeForKey(int key, bool 
 }
 
 void BTree::insertCellIntoNode(std::shared_ptr<BTreeNodeCell> cell, std::shared_ptr<BTreeNode> node) {
-
+    if (node->size > BTREE_2D)
+        throw "Not enough space in node!";
+    node->insert(cell);
+    // overflow
+    if (node->size > BTREE_2D) {
+        bool status = compensate(node);
+        if(!status)
+            splitNode(node);
+    }
 }
 
 std::vector<int> BTree::getSiblings(std::shared_ptr<BTreeNode> node) {
-    return std::vector<int>();
+    if (node->parent == MAX_SIZE) // if node is root
+        return std::vector<int>();
+    std::vector<int> siblings;
+    auto parentNode = btree->get(node->parent);
+    if (parentNode->cells.size() < 2)
+        return std::vector<int>();
+    else if (parentNode->cells[0]->child == node->index) // rightmost index;
+        siblings.push_back(node->cells[1]->child);
+    else if (parentNode->cells.back()->child == node->index)  // leftmost TODO: check correctness
+        siblings.push_back(node->cells[node->cells.size()-2]->child);
+    else {
+        for (int i = 0; i < parentNode->cells.size(); i++) {
+            if(node->index == parentNode->cells[i]->child) {
+                siblings.push_back(parentNode->cells[i-1]->child);
+                siblings.push_back(parentNode->cells[i+1]->child);
+                break;
+            }
+        }
+    }
 }
 
 bool BTree::compensate(std::shared_ptr<BTreeNode> node) {
@@ -78,7 +104,6 @@ bool BTree::compensate(std::shared_ptr<BTreeNode> node) {
 }
 
 void BTree::rotateNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2) {
-
 }
 
 void BTree::splitNode(std::shared_ptr<BTreeNode>) {
