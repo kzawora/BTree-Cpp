@@ -10,14 +10,14 @@ BTreeNode::BTreeNode(int _index, int _parent, bool _leaf)
 
 int BTreeNode::size() { return cells.size() - 1; }
 
-void BTreeNode::insert(std::shared_ptr<BTreeNodeCell> newCell) {
+std::shared_ptr<BTreeNodeCell> BTreeNode::insert(std::shared_ptr<BTreeNodeCell> newCell) {
     if (cells.size() > BTREE_2D + 1)
         throw "Cannot insert cell into node! Node has no free space!";
 
     for (size_t i = 0; i < cells.size(); i++) {
         if (this->cells[i]->isLastElementInNode() || this->cells[i]->getKey() > newCell->getKey()) {
             cells.insert(cells.begin() + i, newCell);
-            return;
+            return newCell;
         }
     }
 }
@@ -37,7 +37,7 @@ std::shared_ptr<BTreeNodeCell> BTreeNode::pop(int _key) {
 // TODO: test this
 std::shared_ptr<BTreeNodeCell> BTreeNode::getCellByKey(int _key) {
     if (cells.size() < 2) {
-        throw "Cell not found!";
+        return nullptr;//throw "Cell not found!";
     }
     auto prev_key = 0;
     for (auto cell : cells) {
@@ -45,7 +45,7 @@ std::shared_ptr<BTreeNodeCell> BTreeNode::getCellByKey(int _key) {
             return cell;
         prev_key = cell->getKey();
     }
-    throw "Cell not found!";
+    return nullptr;//throw "Cell not found!";
 }
 
 std::shared_ptr<BTreeNodeCell> BTreeNode::getCellByChild(int _cell) {
@@ -89,8 +89,10 @@ std::shared_ptr<BTreeNode> BTreeNode::deserialize(std::shared_ptr<bytearray> dat
             break;
         newNode->cells.push_back(cell);
     }
-    if (newNode->cells.size() < 1 || !newNode->cells.back()->isLastElementInNode())
+    if (newNode->cells.size() < 1 || !newNode->cells.back()->isLastElementInNode()) {
         newNode->cells.push_back(std::make_shared<BTreeNodeCell>());
+        newNode->leaf = true;
+    }
     return newNode;
 }
 

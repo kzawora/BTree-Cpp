@@ -12,10 +12,11 @@
 
 
 class Record {
-    int index;
     std::vector<double> values;
 
 public:
+    int index;
+
     Record();
 
     Record(int _index, std::vector<double> vals);

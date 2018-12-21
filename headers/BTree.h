@@ -55,7 +55,7 @@ namespace BTreeNS {
 
         int size();
 
-        void insert(std::shared_ptr<BTreeNodeCell> newCell);
+        std::shared_ptr<BTreeNodeCell> insert(std::shared_ptr<BTreeNodeCell> newCell);
 
         std::shared_ptr<BTreeNodeCell> pop(int _key);
 

@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 
-int shell_cmd(std::string cmd) {
+int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
     if (cmd == "") {
         std::cout << "You need to type a command." << std::endl;
         return 0;
@@ -41,6 +41,22 @@ int shell_cmd(std::string cmd) {
         }
         auto count = std::stoi(words[1]);
         std::cout << "Randomly generating " << count << " records." << std::endl;
+        int next_key = 0;
+        std::vector<int> indices;
+        while (count > 0) {
+            auto ptr = db->get(next_key);
+            if (ptr == nullptr) {
+                db->set(next_key, Record::generate());
+                count--;
+                indices.push_back(next_key);
+            }
+            next_key++;
+        }
+        std::cout << "Added " << indices.size() << "elements. (";
+        for (auto index : indices)
+            std::cout << index << ' ';
+        std::cout << ")" << std::endl;
+
     } else if (words[0] == "dump") {
         std::cout << "dumping..." << std::endl;
     } else if (words[0] == "show") {
@@ -134,15 +150,15 @@ int main() {
     /*
 
         */
-    btreetest();
-    datatest();
-    /*
+//    btreetest();
+//    datatest();
+    auto db = std::make_shared<BTreeNS::BTree>("database");
     while (true) {
         std::cout << "> ";
+        std::string input;
         getline(std::cin, input);
-        int status = shell_cmd(input);
+        int status = shell_cmd(input, db);
         if (status == -1) break;
     }
-    */
     return 0;
 }

@@ -8,6 +8,9 @@ BTree::BTree(std::string _name) {
     name = _name;
     btree = std::make_shared<BTreeStorage>(name);
     data = std::make_shared<DataStorage>(name);
+    auto metadataname = name;
+    metadataname.append(".meta");
+    metadataStorage = std::make_shared<Storage>(metadataname, 7 * sizeof(int));
     loadMetadata();
 }
 
@@ -22,7 +25,19 @@ void BTree::flush() {
 }
 
 void BTree::loadMetadata() {
-    metadata[3] = -1;
+    auto str = name.append(".meta");
+    std::ifstream in(str, std::ifstream::ate | std::ifstream::binary);
+    bool size = in.tellg();
+    in.close();
+    if (size > 0) {
+        // load metadata
+        auto meta = metadataStorage->getPage(0);
+        memcpy(reinterpret_cast<char *>(&metadata[0]), meta->arr, 7 * sizeof(int));
+    } else {
+        auto node = createTree();
+
+        flushMetadata();
+    }
 }
 
 void BTree::flushMetadata() {
@@ -30,7 +45,9 @@ void BTree::flushMetadata() {
     metadata[5] = data->nextoffset; // data_next_offset
     metadata[6] = btree->nextnode; // btree_next_node
     // zapisywanie metadanych do bytearray;
-//  metadataStorage->setPage(0,)
+    std::shared_ptr<bytearray> meta = std::make_shared<bytearray>(7 * sizeof(int));
+    memcpy(meta->arr, reinterpret_cast<char *>(&metadata[0]), 7 * sizeof(int));
+    metadataStorage->setPage(0, meta);
 }
 
 void BTree::syncMetadataStorage() {
@@ -64,15 +81,17 @@ std::shared_ptr<BTreeNode> BTree::newNode() {
 
 std::tuple<std::shared_ptr<BTreeNode>, bool> BTree::getNodeForKey(int key, bool test) {
     auto node_idx = metadata[3]; // root;
-    std::shared_ptr<BTreeNode> node = btree->get(node_idx);
     if (node_idx == -1)
         if (test)
-            return std::tuple<std::shared_ptr<BTreeNode>, bool>(createTree(), true);
+            return std::tuple<std::shared_ptr<BTreeNode>, bool>(createTree(), false);
         else
-            return std::tuple<std::shared_ptr<BTreeNode>, bool>(nullptr, true);
-
+            return std::tuple<std::shared_ptr<BTreeNode>, bool>(nullptr, false);
+    std::shared_ptr<BTreeNode> node = btree->get(node_idx);
     while (true) {
         auto cell = node->getCellByKey(key);
+        if(cell == nullptr) {
+            return std::tuple<std::shared_ptr<BTreeNode>, bool>(node, false);
+        }
         if (cell->getKey() == key)
             return std::tuple<std::shared_ptr<BTreeNode>, bool>(node, true);
         else if (cell->child < MAX_SIZE) {
@@ -257,11 +276,39 @@ void BTree::deleteKeyFromNode(int key, std::shared_ptr<BTreeNode> node) {
 }
 
 std::shared_ptr<Record> BTree::get(int key) {
-    return std::shared_ptr<Record>();
+    auto tup = getNodeForKey(key, false);
+    auto node = std::get<0>(tup);
+    auto present = std::get<1>(tup);
+    if (!present)
+        return nullptr;
+
+    auto cell = node->getCellByKey(key);
+    if (cell == nullptr)
+        return nullptr;
+
+    auto rec = data->get(cell->getPage(), cell->getOffset());
+    if (rec == nullptr)
+        return nullptr;
+    rec->index = key;
+
+    return rec;
 }
 
 void BTree::set(int key, std::shared_ptr<Record> rec) {
-
+    auto tup = getNodeForKey(key);
+    auto node = std::get<0>(tup);
+    auto present = std::get<1>(tup);
+    if (present) {
+        auto cell = node->getCellByKey(key);
+        data->set(cell->getPage(), cell->getOffset(), rec);
+    } else {
+        auto tup2 = data->insert(rec);
+        auto page = std::get<0>(tup2);
+        auto offset = std::get<1>(tup2);
+        insertCellIntoNode(std::make_shared<BTreeNodeCell>(key, page, offset), node);
+        metadata[0]++; // elements
+    }
+    btree->set(node->index, node);
 }
 
 void BTree::del(int key) {
