@@ -26,7 +26,7 @@ void BTree::flush() {
 
 void BTree::printData() {
     int size = metadata[0];
-    for(int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         auto rec = get(i);
         rec->print();
     }
@@ -137,9 +137,9 @@ std::vector<int> BTree::getSiblings(std::shared_ptr<BTreeNode> node) {
     if (parentNode->cells.size() < 2)
         return std::vector<int>();
     else if (parentNode->cells[0]->child == node->index) // rightmost index;
-        siblings.push_back(node->cells[1]->child);
+        siblings.push_back(parentNode->cells[1]->child);
     else if (parentNode->cells.back()->child == node->index)  // leftmost TODO: check correctness
-        siblings.push_back(node->cells[node->cells.size() - 2]->child);
+        siblings.push_back(parentNode->cells.end()[-2]->child);
     else {
         for (int i = 0; i < parentNode->cells.size(); i++) {
             if (node->index == parentNode->cells[i]->child) {
@@ -169,9 +169,11 @@ bool BTree::compensate(std::shared_ptr<BTreeNode> node) {
 void BTree::rotateNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2) {
     refreshReference(node1);
     refreshReference(node2);
+
     if (node1->size() == node2->size()) {
         return;
     }
+
     auto parent = btree->get(node1->parent);
     int target_length = (node1->size() + node2->size()) / 2;
 
@@ -204,11 +206,13 @@ void BTree::rotateNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeN
     } else if (node1->size() < node2->size()) {
         // left rotate
         while (node1->size() != target_length && node2->size() > 1) {
-            auto moved = node1->cells.front();
-            node1->cells.erase(node1->cells.begin());
+            auto moved = node2->cells.front();
+            node2->cells.erase(node2->cells.begin());
+
             parent_element->swapKeys(moved);
             moved->swapChildren(node1->cells.back());
-            node1->cells.push_back(moved);
+
+            node1->cells.insert(node1->cells.end() - 1, moved);
         }
     }
     for (auto cell : node1->cells) {

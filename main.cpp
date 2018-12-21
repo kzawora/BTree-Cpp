@@ -6,6 +6,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <ctime>
 
 int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
     if (cmd == "") {
@@ -15,19 +16,36 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
     std::istringstream iss(cmd);
     std::vector<std::string> words(std::istream_iterator<std::string>{iss}, std::istream_iterator<std::string>());
     if (words[0] == "help") {
-        std::cout << "help is on the way" << std::endl;
-    } else if (words[0] == "add") {
-        if (words.size() < 3) {
-            std::cout << "[ERROR] add requires index and list of numbers." << std::endl;
+        std::cout << "help\t- displays help" << std::endl;
+        std::cout << "meta\t- shows btree metadata" << std::endl;
+        std::cout << "delete\t- " << std::endl;
+        std::cout << "random (n)\t- adds n random records (ascending indices)" << std::endl;
+        std::cout << "superrandom (n)\t- adds n random records (random indices)" << std::endl;
+        std::cout << "data\t- dumps every record in btree" << std::endl;
+        std::cout << "get (n)\t- gets record with key n" << std::endl;
+        std::cout << "set (n) (opt: values)\t- sets record with key n with random data or specified values"
+                  << std::endl;
+        std::cout << "show\t- visualizes btree" << std::endl;
+        std::cout << "exit\t- exits" << std::endl;
+
+
+    } else if (words[0] == "set") {
+        if (words.size() < 2) {
+            std::cout << "[ERROR] set requires index." << std::endl;
             return 0;
         }
+        std::shared_ptr<Record> r;
         auto index = std::stoi(words[1]);
-        std::vector<double> values;
-        for (int i = 2; i < words.size(); i++) {
-            values.push_back(std::stod(words[i]));
+        if (words.size() > 2) {
+            std::vector<double> values;
+            for (int i = 2; i < words.size(); i++) {
+                values.push_back(std::stod(words[i]));
+            }
+            r = std::make_shared<Record>(index, values);
         }
-        Record r(index, values);
-        std::cout << "Adding " << r << "at index " << index << "." << std::endl;
+        r = Record::generate();
+        std::cout << "Adding " << *r << "at index " << index << "." << std::endl;
+        db->set(index, r);
     } else if (words[0] == "delete") {
         if (words.size() < 2) {
             std::cout << "[ERROR] random requires a additional integer argument." << std::endl;
@@ -35,7 +53,20 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
         }
         auto count = std::stoi(words[1]);
         std::cout << "Deleting record with index " << count << "." << std::endl;
+    } else if (words[0] == "get") {
+        if (words.size() < 2) {
+            std::cout << "[ERROR] get requires a additional integer argument." << std::endl;
+            return 0;
+        }
+        auto key = std::stoi(words[1]);
+        auto rec = db->get(key);
+        if (rec == nullptr) {
+            std::cout << "[ERROR] key " << key << " does not exist." << std::endl;
+            return 0;
+        }
+        rec->print();
     } else if (words[0] == "flush") {
+        std::cout << "flushing..." << std::endl;
         db->flush();
     } else if (words[0] == "random") {
         if (words.size() < 2) {
@@ -66,9 +97,8 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
                 std::cout << " ";
 
         }
-
-    } else if (words[0] == "dump") {
-        std::cout << "dumping..." << std::endl;
+    } else if (words[0] == "data") {
+        std::cout << "dumping data..." << std::endl;
         db->flush();
         db->printData();
     } else if (words[0] == "show") {
@@ -78,6 +108,28 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
     } else if (words[0] == "exit") {
         std::cout << "exiting..." << std::endl;
         return -1;
+    } else if (words[0] == "clear") {
+        db->createTree();
+        return 0;
+    } else if (words[0] == "superrandom") {
+        if (words.size() < 2) {
+            std::cout << "[ERROR] random requires a additional integer argument." << std::endl;
+            return 0;
+        }
+        auto count = std::stoi(words[1]);
+        std::cout << "Randomly generating " << count << " records." << std::endl;
+        std::vector<int> indices;
+        while (count > 0) {
+            int next_key = rand() % 99999 + 0;
+            auto ptr = db->get(next_key);
+            if (ptr == nullptr) {
+                auto rec = Record::generate();
+                rec->print();
+                db->set(next_key, rec);
+                count--;
+                indices.push_back(next_key);
+            }
+        }
     } else {
         std::cout << "Unrecognized command: " << words[0] << std::endl;
     }
@@ -166,6 +218,7 @@ int main() {
         */
 //    btreetest();
 //    datatest();
+    srand(time(0));
     auto db = std::make_shared<BTreeNS::BTree>("database");
     while (true) {
         std::cout << "> ";
