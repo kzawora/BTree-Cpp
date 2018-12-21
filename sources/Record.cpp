@@ -16,7 +16,10 @@ Record::Record(int _index, std::vector<double> vals) : index(_index) {
 void Record::print() { std::cout << *this << std::endl; }
 
 std::ostream &operator<<(std::ostream &stream, const Record &record) {
-    stream << "RECORD " << record.index << ": ";
+    stream << "RECORD";
+    if (record.index != -1)
+        std::cout << " " << record.index;
+    std::cout << ": ";
     for (auto i = record.values.begin(); i != record.values.end(); ++i)
         if (!std::isnan(*i))
             stream << *i << ' ';

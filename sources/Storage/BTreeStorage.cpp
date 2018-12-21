@@ -36,6 +36,16 @@ void BTreeStorage::addToCache(int index, std::shared_ptr<BTreeNS::BTreeNode> nod
     btreecache.push_back(tup);
 }
 
+void BTreeStorage::removeFromCache(int index) {
+    for (int i = 0; i < btreecache.size(); i++) {
+        if (std::get<0>(btreecache[i]) == index) {
+            btreecache.erase(btreecache.begin() + i);
+            return;
+        }
+    }
+}
+
+
 std::shared_ptr<BTreeNS::BTreeNode> BTreeStorage::get(int index) {
     std::shared_ptr<BTreeNS::BTreeNode> node;
 

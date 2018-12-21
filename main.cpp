@@ -42,8 +42,8 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
                 values.push_back(std::stod(words[i]));
             }
             r = std::make_shared<Record>(index, values);
-        }
-        r = Record::generate();
+        } else
+            r = Record::generate();
         std::cout << "Adding " << *r << "at index " << index << "." << std::endl;
         db->set(index, r);
     } else if (words[0] == "delete") {
@@ -51,8 +51,9 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
             std::cout << "[ERROR] random requires a additional integer argument." << std::endl;
             return 0;
         }
-        auto count = std::stoi(words[1]);
-        std::cout << "Deleting record with index " << count << "." << std::endl;
+        auto key = std::stoi(words[1]);
+        std::cout << "Deleting record with index " << key << "." << std::endl;
+        db->del(key);
     } else if (words[0] == "get") {
         if (words.size() < 2) {
             std::cout << "[ERROR] get requires a additional integer argument." << std::endl;
@@ -98,19 +99,23 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
 
         }
     } else if (words[0] == "data") {
-        std::cout << "dumping data..." << std::endl;
+        std::cout << "printing data..." << std::endl;
         db->flush();
         db->printData();
     } else if (words[0] == "show") {
-        std::cout << "show..." << std::endl;
+        std::cout << "generating dot file for use with GraphViz..." << std::endl;
         db->flush();
         graphViz(db);
     } else if (words[0] == "exit") {
         std::cout << "exiting..." << std::endl;
         return -1;
-    } else if (words[0] == "clear") {
-        db->createTree();
-        return 0;
+    } else if (words[0] == "meta") {
+        std::stringstream ss;
+        ss << "Elements: " << db->metadata[0] << " "\
+                "/ Nodes: " << db->metadata[1] << " "\
+                "/ Height: " << db->metadata[2] << " "\
+                "/ Root: " << db->metadata[3] << " ";
+        std::cout << ss.str() << std::endl;
     } else if (words[0] == "superrandom") {
         if (words.size() < 2) {
             std::cout << "[ERROR] random requires a additional integer argument." << std::endl;

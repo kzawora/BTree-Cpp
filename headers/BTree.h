@@ -68,18 +68,7 @@ namespace BTreeNS {
         static std::shared_ptr<BTreeNode> deserialize(std::shared_ptr<bytearray> data, int index);
     };
 
-    class BTreeMetadata {
-    public:
-        int element{0};
-        int nodes{1};
-        int height{1};
-        int root{0};
-        int btree_next_node{0};
-        std::vector<std::shared_ptr<BTreeNode>> btree_free_nodes;
-    };
-
     class BTree {
-//        std::shared_ptr<BTreeMetadata> metadata;
         std::shared_ptr<DataStorage> data;
         std::string name;
         std::shared_ptr<Storage> metadataStorage;
@@ -122,7 +111,7 @@ namespace BTreeNS {
 
         void splitNode(std::shared_ptr<BTreeNode>);
 
-        void rebalance(std::shared_ptr<BTreeNode> node);
+        bool rebalance(std::shared_ptr<BTreeNode> node);
 
         void mergeNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2);
 

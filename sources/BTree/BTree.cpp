@@ -26,9 +26,12 @@ void BTree::flush() {
 
 void BTree::printData() {
     int size = metadata[0];
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; size > 0; i++) {
         auto rec = get(i);
-        rec->print();
+        if (rec != nullptr) {
+            rec->print();
+            size--;
+        }
     }
 };
 
@@ -284,20 +287,90 @@ void BTree::splitNode(std::shared_ptr<BTreeNode> node) {
 
 }
 
-void BTree::rebalance(std::shared_ptr<BTreeNode> node) {
+bool BTree::rebalance(std::shared_ptr<BTreeNode> node) {
+    refreshReference(node);
+    auto siblings = getSiblings(node);
+    for (auto idx : siblings) {
+        if (idx == MAX_SIZE)
+            continue;
 
+        refreshReference(node);
+        auto node2 = btree->get(idx);
+        if (node->size() + node2->size() < BTREE_2D) {
+            mergeNodes(node, node2);
+            return true;
+        }
+    }
+    return false;
 }
 
 void BTree::mergeNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2) {
+    refreshReference(node1);
+    refreshReference(node2);
 
+    if (node1->cells[0]->getKey() > node2->cells[0]->getKey())
+        std::swap(node1, node2);
+
+    if (node1->parent == MAX_SIZE || node1->parent != node2->parent)
+        throw "Cannot merge root node!";
+
+    auto parentnode = btree->get(node1->parent);
+    auto stolen_cell = parentnode->getCellByChild(node1->index);
+    auto ptr_cell = parentnode->getCellByChild(node2->index);
+
+    stolen_cell->swapKeys(node1->cells.back());
+    parentnode->pop(stolen_cell->getKey());
+    ptr_cell->child = node1->index;
+
+    for (auto cell : node2->cells) {
+        if (cell->child != MAX_SIZE) {
+            btree->get(cell->child)->parent = node1->index;
+            refreshReference(node2);
+        }
+    }
+    refreshReference(node1);
+    refreshReference(node2);
+
+    while (node2->cells.size() > 0) {
+        node1->cells.push_back(node2->cells.front());
+        node2->cells.erase(node2->cells.begin());
+    }
+
+    btree->removeFromCache(node2->index);
+
+    refreshReference(parentnode);
+    repairNodeAfterDeletion(parentnode);
+
+    if (parentnode->index == metadata[3] && parentnode->size() == 0) {
+        metadata[3] = node1->index;
+        btree->removeFromCache(parentnode->index);
+        metadata[2]--;
+        node1->parent = MAX_SIZE;
+        node1->leaf = metadata[2] == 1;
+    }
 }
 
 void BTree::repairNodeAfterDeletion(std::shared_ptr<BTreeNode> node) {
-
+    if (node->index == metadata[3])
+        return;
+    if (node->size() < BTREE_D) {
+        auto status = compensate(node);
+        if (!status)
+            rebalance(node);
+    }
 }
 
 void BTree::deleteKeyFromNode(int key, std::shared_ptr<BTreeNode> node) {
-
+    refreshReference(node);
+    if (node->leaf) {
+        auto elem = node->pop(key);
+        repairNodeAfterDeletion(node);
+    } else {
+        auto swapped = node->getCellByKey(key);
+        auto child = btree->get(swapped->child);
+        swapped->swapKeys(child->cells.end()[-2]);
+        deleteKeyFromNode(key, child);
+    }
 }
 
 std::shared_ptr<Record> BTree::get(int key) {
@@ -337,5 +410,12 @@ void BTree::set(int key, std::shared_ptr<Record> rec) {
 }
 
 void BTree::del(int key) {
-
+    auto tup = getNodeForKey(key);
+    auto node = std::get<0>(tup);
+    auto present = std::get<1>(tup);
+    if (!present) {
+        throw "Element does not exist!";
+    }
+    deleteKeyFromNode(key, node);
+    metadata[0]--;
 }

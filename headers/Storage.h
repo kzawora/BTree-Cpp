@@ -54,6 +54,8 @@ public:
 
     void addToCache(int index, std::shared_ptr<BTreeNS::BTreeNode> node);
 
+    void removeFromCache(int index);
+
     std::shared_ptr<BTreeNS::BTreeNode> newNode();
 
     void flush();

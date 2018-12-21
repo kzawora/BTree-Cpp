@@ -56,9 +56,9 @@ std::string createDot(std::shared_ptr<BTreeNS::BTree> tree, std::string label, i
 void graphViz(std::shared_ptr<BTreeNS::BTree> tree) {
     std::stringstream label;
     label << "Elements: " << tree->metadata[0] << " "\
-                "| Nodes: " << tree->metadata[1] << " "\
-                "| Height: " << tree->metadata[2] << " "\
-                "| Root: " << tree->metadata[3] << " ";
+                "/ Nodes: " << tree->metadata[1] << " "\
+                "/ Height: " << tree->metadata[2] << " "\
+                "/ Root: " << tree->metadata[3] << " ";
     auto str = createDot(tree, label.str(), tree->metadata[3]);
     std::ofstream file("gv.dot");
     file << str;

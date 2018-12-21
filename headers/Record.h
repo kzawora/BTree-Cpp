@@ -15,7 +15,7 @@ class Record {
     std::vector<double> values;
 
 public:
-    int index;
+    int index {-1};
 
     Record();
 
