@@ -1,4 +1,6 @@
 #include "../headers/Record.h"
+#include <chrono>
+#include <random>
 
 Record::Record() = default;
 
@@ -23,7 +25,8 @@ std::ostream &operator<<(std::ostream &stream, const Record &record) {
 
 std::shared_ptr<Record> Record::generate() {
     std::shared_ptr<Record> r = std::make_shared<Record>();
-    std::default_random_engine gen(static_cast<unsigned int>(clock())); // clock()
+    std::default_random_engine gen;
+    gen.seed(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> dist(DIST_LOWER_LIMIT, DIST_UPPER_LIMIT);
     auto generator = [&]() { return dist(gen); };
     for (int i = 0; i < MAX_RECORD_SIZE; i++) {

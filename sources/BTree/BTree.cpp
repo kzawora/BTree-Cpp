@@ -24,6 +24,14 @@ void BTree::flush() {
     data->flush();
 }
 
+void BTree::printData() {
+    int size = metadata[0];
+    for(int i = 0; i < size; i++) {
+        auto rec = get(i);
+        rec->print();
+    }
+};
+
 void BTree::loadMetadata() {
     auto str = name.append(".meta");
     std::ifstream in(str, std::ifstream::ate | std::ifstream::binary);
@@ -78,6 +86,7 @@ std::shared_ptr<BTreeNode> BTree::newNode() {
     metadata[1]++; // nodes
     return btree->newNode();
 }
+
 void BTree::refreshReference(std::shared_ptr<BTreeNode> node) {
     btree->get(node->index);
 }
@@ -255,7 +264,7 @@ void BTree::splitNode(std::shared_ptr<BTreeNode> node) {
         auto newroot = newNode();
 
         newroot->cells[0]->child = node->index;
-        newroot->cells.push_back(center_cell);
+        newroot->cells.insert(newroot->cells.begin(), center_cell);
         newroot->leaf = false;
 
         node->parent = newroot->index;

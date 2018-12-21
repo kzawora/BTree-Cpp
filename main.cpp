@@ -1,6 +1,7 @@
 #include "headers/BTree.h"
 #include "headers/Record.h"
 #include "headers/Storage.h"
+#include "headers/GraphViz.h"
 #include <iostream>
 #include <iterator>
 #include <sstream>
@@ -48,7 +49,9 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
         while (count > 0) {
             auto ptr = db->get(next_key);
             if (ptr == nullptr) {
-                db->set(next_key, Record::generate());
+                auto rec = Record::generate();
+                rec->print();
+                db->set(next_key, rec);
                 count--;
                 indices.push_back(next_key);
             }
@@ -66,8 +69,12 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
 
     } else if (words[0] == "dump") {
         std::cout << "dumping..." << std::endl;
+        db->flush();
+        db->printData();
     } else if (words[0] == "show") {
         std::cout << "show..." << std::endl;
+        db->flush();
+        graphViz(db);
     } else if (words[0] == "exit") {
         std::cout << "exiting..." << std::endl;
         return -1;

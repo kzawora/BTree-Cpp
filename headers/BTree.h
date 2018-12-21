@@ -81,12 +81,13 @@ namespace BTreeNS {
     class BTree {
 //        std::shared_ptr<BTreeMetadata> metadata;
         std::shared_ptr<DataStorage> data;
-        std::shared_ptr<BTreeStorage> btree;
         std::string name;
-        std::vector<int> metadata;
         std::shared_ptr<Storage> metadataStorage;
 
     public:
+        std::vector<int> metadata;
+        std::shared_ptr<BTreeStorage> btree;
+
         BTree(std::string _name);
 
         ~BTree();
@@ -100,6 +101,8 @@ namespace BTreeNS {
         void flushMetadata();
 
         void syncMetadataStorage();
+
+        void printData();
 
         std::shared_ptr<BTreeNode> createTree();
 

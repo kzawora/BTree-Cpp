@@ -9,4 +9,4 @@ add_executable(sbd2
         main.cpp
         sources/Record.cpp
         sources/Storage/Storage.cpp
-        headers/CommonHeader.h headers/BTree.h headers/Record.h headers/Storage.h sources/BTree/BTreeNode.cpp sources/BTree/BTreeNodeCell.cpp sources/Storage/DataStorage.cpp sources/Storage/BTreeStorage.cpp)
+        headers/CommonHeader.h headers/BTree.h headers/Record.h headers/Storage.h sources/BTree/BTreeNode.cpp sources/BTree/BTreeNodeCell.cpp sources/Storage/DataStorage.cpp sources/Storage/BTreeStorage.cpp sources/GraphViz.cpp headers/GraphViz.h)
