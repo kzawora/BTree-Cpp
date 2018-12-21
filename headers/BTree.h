@@ -93,6 +93,8 @@ namespace BTreeNS {
 
         void flush();
 
+        void flushNode(std::shared_ptr<BTreeNode> node);
+
         void loadMetadata();
 
         void flushMetadata();
@@ -102,6 +104,8 @@ namespace BTreeNS {
         std::shared_ptr<BTreeNode> createTree();
 
         std::shared_ptr<BTreeNode> newNode();
+
+        void refreshReference(std::shared_ptr<BTreeNode> node);
 
         std::tuple<std::shared_ptr<BTreeNode>, bool> getNodeForKey(int key, bool test = true);
 

@@ -34,6 +34,8 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
         }
         auto count = std::stoi(words[1]);
         std::cout << "Deleting record with index " << count << "." << std::endl;
+    } else if (words[0] == "flush") {
+        db->flush();
     } else if (words[0] == "random") {
         if (words.size() < 2) {
             std::cout << "[ERROR] random requires a additional integer argument." << std::endl;
@@ -52,10 +54,15 @@ int shell_cmd(std::string cmd, std::shared_ptr<BTreeNS::BTree> db) {
             }
             next_key++;
         }
-        std::cout << "Added " << indices.size() << "elements. (";
-        for (auto index : indices)
-            std::cout << index << ' ';
-        std::cout << ")" << std::endl;
+        std::cout << "Added " << indices.size() << " elements. {";
+        for (auto index : indices) {
+            std::cout << index;
+            if (index == indices.back())
+                std::cout << "}" << std::endl;
+            else
+                std::cout << " ";
+
+        }
 
     } else if (words[0] == "dump") {
         std::cout << "dumping..." << std::endl;

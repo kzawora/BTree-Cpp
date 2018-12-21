@@ -78,6 +78,9 @@ std::shared_ptr<BTreeNode> BTree::newNode() {
     metadata[1]++; // nodes
     return btree->newNode();
 }
+void BTree::refreshReference(std::shared_ptr<BTreeNode> node) {
+    btree->get(node->index);
+}
 
 std::tuple<std::shared_ptr<BTreeNode>, bool> BTree::getNodeForKey(int key, bool test) {
     auto node_idx = metadata[3]; // root;
@@ -89,7 +92,7 @@ std::tuple<std::shared_ptr<BTreeNode>, bool> BTree::getNodeForKey(int key, bool 
     std::shared_ptr<BTreeNode> node = btree->get(node_idx);
     while (true) {
         auto cell = node->getCellByKey(key);
-        if(cell == nullptr) {
+        if (cell == nullptr) {
             return std::tuple<std::shared_ptr<BTreeNode>, bool>(node, false);
         }
         if (cell->getKey() == key)
@@ -97,18 +100,21 @@ std::tuple<std::shared_ptr<BTreeNode>, bool> BTree::getNodeForKey(int key, bool 
         else if (cell->child < MAX_SIZE) {
             node = btree->get(cell->child);
             node_idx = cell->child;
+            // flush?
         } else
             return std::tuple<std::shared_ptr<BTreeNode>, bool>(node, false);
     }
 }
 
 void BTree::insertCellIntoNode(std::shared_ptr<BTreeNodeCell> cell, std::shared_ptr<BTreeNode> node) {
+    refreshReference(node);
     if (node->size() > BTREE_2D)
         throw "Not enough space in node!";
     node->insert(cell);
     // overflow
     if (node->size() > BTREE_2D) {
         bool status = compensate(node);
+        refreshReference(node);
         if (!status)
             splitNode(node);
     }
@@ -152,6 +158,8 @@ bool BTree::compensate(std::shared_ptr<BTreeNode> node) {
 }
 
 void BTree::rotateNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2) {
+    refreshReference(node1);
+    refreshReference(node2);
     if (node1->size() == node2->size()) {
         return;
     }
@@ -197,17 +205,20 @@ void BTree::rotateNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeN
     for (auto cell : node1->cells) {
         if (cell->child != MAX_SIZE) {
             btree->get(cell->child)->parent = node1->index;
+            refreshReference(node1);
         }
 
     }
     for (auto cell : node2->cells) {
         if (cell->child != MAX_SIZE) {
             btree->get(cell->child)->parent = node2->index;
+            refreshReference(node2);
         }
     }
 }
 
 void BTree::splitNode(std::shared_ptr<BTreeNode> node) {
+    refreshReference(node);
 
     auto newnode = newNode();
     newnode->leaf = node->leaf;
@@ -216,8 +227,8 @@ void BTree::splitNode(std::shared_ptr<BTreeNode> node) {
     auto center_cell = node->cells[target_length];
     node->cells.erase(node->cells.begin() + target_length);
 
-    auto new_node_last_cell = node->cells.front();
-    node->cells.erase(node->cells.begin());
+    auto new_node_last_cell = newnode->cells.front();
+    newnode->cells.erase(newnode->cells.begin());
 
     new_node_last_cell->swapChildren(center_cell);
     if (new_node_last_cell->child != MAX_SIZE) {
@@ -257,6 +268,7 @@ void BTree::splitNode(std::shared_ptr<BTreeNode> node) {
         insertCellIntoNode(center_cell, parent_node);
         btree->get(nnindex)->parent = parent_node->index;
     }
+
 }
 
 void BTree::rebalance(std::shared_ptr<BTreeNode> node) {
@@ -308,7 +320,7 @@ void BTree::set(int key, std::shared_ptr<Record> rec) {
         insertCellIntoNode(std::make_shared<BTreeNodeCell>(key, page, offset), node);
         metadata[0]++; // elements
     }
-    btree->set(node->index, node);
+    //btree->set(node->index, node);
 }
 
 void BTree::del(int key) {

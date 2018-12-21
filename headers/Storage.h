@@ -10,6 +10,9 @@
 #include <tuple>
 #include <memory>
 
+namespace BTreeNS {
+    class BTreeNode;
+}
 class Storage {
     std::string filename;
     int pagesize, filesize, pages;
@@ -35,7 +38,7 @@ class BTreeStorage {
     std::shared_ptr<Storage> storage;
     std::vector<int> freenodes;
     std::shared_ptr<bytearray> page;
-
+    std::vector<std::tuple<int, std::shared_ptr<BTreeNS::BTreeNode>>> btreecache;
 public:
     int nextnode;
 
@@ -48,6 +51,8 @@ public:
     std::shared_ptr<BTreeNS::BTreeNode> get(int index);
 
     void set(int index, std::shared_ptr<BTreeNS::BTreeNode> node);
+
+    void addToCache(int index, std::shared_ptr<BTreeNS::BTreeNode> node);
 
     std::shared_ptr<BTreeNS::BTreeNode> newNode();
 
