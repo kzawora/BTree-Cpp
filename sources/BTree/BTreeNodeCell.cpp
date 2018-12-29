@@ -11,7 +11,7 @@ bool BTreeNodeCell::isDefault() {
     return child == MAX_SIZE && key == MAX_SIZE && page == MAX_SIZE && offset == MAX_SIZE;
 }
 
-void BTreeNodeCell::swapKeys(std::shared_ptr<BTreeNodeCell> toSwap) {
+void BTreeNodeCell::swapCellValues(std::shared_ptr<BTreeNodeCell> toSwap) {
     std::swap(this->key, toSwap->key);
     std::swap(this->page, toSwap->page);
     std::swap(this->offset, toSwap->offset);

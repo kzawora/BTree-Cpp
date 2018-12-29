@@ -19,6 +19,8 @@ class Storage {
     std::fstream file;
 
 public:
+    static int reads, writes;
+
     Storage(std::string _name, int _pagesize);
 
     ~Storage();
@@ -36,7 +38,7 @@ public:
 
 class BTreeStorage {
     std::shared_ptr<Storage> storage;
-    std::vector<int> freenodes;
+//    std::vector<int> freenodes;
     std::shared_ptr<bytearray> page;
     std::vector<std::tuple<int, std::shared_ptr<BTreeNS::BTreeNode>>> btreecache;
 public:

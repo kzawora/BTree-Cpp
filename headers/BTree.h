@@ -28,7 +28,7 @@ namespace BTreeNS {
 
         bool isDefault();
 
-        void swapKeys(std::shared_ptr<BTreeNodeCell> toSwap);
+        void swapCellValues(std::shared_ptr<BTreeNodeCell> toSwap);
 
         void swapChildren(std::shared_ptr<BTreeNodeCell> toSwap);
 
@@ -97,7 +97,7 @@ namespace BTreeNS {
 
         std::shared_ptr<BTreeNode> newNode();
 
-        void refreshReference(std::shared_ptr<BTreeNode> node);
+        void cacheUpdate(std::shared_ptr<BTreeNode> node);
 
         std::tuple<std::shared_ptr<BTreeNode>, bool> getNodeForKey(int key, bool test = true);
 
@@ -105,17 +105,17 @@ namespace BTreeNS {
 
         std::vector<int> getSiblings(std::shared_ptr<BTreeNode> node);
 
-        bool compensate(std::shared_ptr<BTreeNode> node);
+        bool compensationPhaseOne(std::shared_ptr<BTreeNode> node);
 
-        void rotateNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2);
+        void compensationPhaseTwo(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2);
 
         void splitNode(std::shared_ptr<BTreeNode>);
 
-        bool rebalance(std::shared_ptr<BTreeNode> node);
+        bool rebalanceAfterDeleting(std::shared_ptr<BTreeNode> node);
 
-        void mergeNodes(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2);
+        void mergeNodesAfterDeleting(std::shared_ptr<BTreeNode> node1, std::shared_ptr<BTreeNode> node2);
 
-        void repairNodeAfterDeletion(std::shared_ptr<BTreeNode> node);
+        void fixNodeAfterDeleting(std::shared_ptr<BTreeNode> node);
 
         void deleteKeyFromNode(int key, std::shared_ptr<BTreeNode> node);
 

@@ -1,5 +1,7 @@
 #include "../../headers/Storage.h"
 #include "../../headers/CommonHeader.h"
+int Storage::reads = 0;
+int Storage::writes = 0;
 
 Storage::Storage(std::string _name, int _pagesize) : filename(_name), pagesize(_pagesize) {
     std::ifstream file_temp(filename, std::fstream::in | std::fstream::out | std::ios::app | std::ios::binary |
@@ -34,6 +36,7 @@ std::shared_ptr<bytearray> Storage::getPage(int index) {
         file.seekg(index * pagesize, std::ios::beg);
         file.read(arr->arr, pagesize);
     }
+    reads++;
     return arr;
 }
 
@@ -55,6 +58,7 @@ void Storage::setPage(int index, std::shared_ptr<bytearray> data) {
         pages++;
     }
     file.flush();
+    writes++;
 }
 
 int Storage::getPageCount() { return pages; }

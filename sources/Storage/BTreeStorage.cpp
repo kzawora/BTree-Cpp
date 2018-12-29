@@ -12,9 +12,10 @@ BTreeStorage::BTreeStorage(std::string name) {
 }
 
 void BTreeStorage::clear() {
+    btreecache.clear();
     storage->clear();
     nextnode = 0;
-    freenodes.clear();
+//    freenodes.clear();
 }
 
 void BTreeStorage::addToCache(int index, std::shared_ptr<BTreeNS::BTreeNode> node) {
@@ -81,11 +82,13 @@ void BTreeStorage::set(int index, std::shared_ptr<BTreeNS::BTreeNode> node) {
 
 std::shared_ptr<BTreeNS::BTreeNode> BTreeStorage::newNode() {
     int index;
+    /*
     if (freenodes.size() > 0) {
         index = freenodes.back();
         freenodes.pop_back();
     } else
-        index = nextnode;
+        */
+    index = nextnode;
 
     std::shared_ptr<BTreeNS::BTreeNode> node = std::make_shared<BTreeNS::BTreeNode>(index);
     addToCache(index, node);

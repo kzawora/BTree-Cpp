@@ -12,22 +12,22 @@
 std::string getTreeLabel(std::shared_ptr<BTreeNS::BTreeNode> node) {
     int rowspan = (node->size() * 2) + 1;
     std::stringstream ss;
-    ss << "<TABLE BORDER=\"0\" CELLBORDER=\"1\" CELLSPACING=\"0\">";
+    ss << "<table border=\"0\" cellborder=\"1\" cellspacing=\"0\">";
     if (node->leaf)
-        ss << "<TR><TD COLSPAN=\"" << rowspan << "\"><B>Leaf Node " << node->index << "</B></TD></TR><TR>";
+        ss << "<tr><td colspan=\"" << rowspan << "\"><b>Leaf Node " << node->index << "</b></td></tr><tr>";
     else
-        ss << "<TR><TD COLSPAN=\"" << rowspan << "\"><B>Node " << node->index << "</B></TD></TR><TR>";
+        ss << "<tr><td colspan=\"" << rowspan << "\"><b>Node " << node->index << "</b></td></tr><tr>";
 
     for (auto cell : node->cells) {
         if (cell->child != MAX_SIZE) {
-            ss << "<TD PORT=\"c" << cell->child << "\"><SUB><u>" << cell->child << "</u></SUB></TD>";
+            ss << "<td port=\"c" << cell->child << "\"><sub><u>" << cell->child << "</u></sub></td>";
         } else
-            ss << "<TD>•</TD>";
+            ss << "<td>•</td>";
         if (cell->getKey() != MAX_SIZE) {
-            ss << "<TD><B>" << cell->getKey() << "</B></TD>";
+            ss << "<td><b>" << cell->getKey() << "</b></td>";
         }
     }
-    ss << "</TR></TABLE>";
+    ss << "</tr></table>";
     return ss.str();
 }
 
@@ -53,13 +53,14 @@ std::string createDot(std::shared_ptr<BTreeNS::BTree> tree, std::string label, i
     return ss.str();
 }
 
-void graphViz(std::shared_ptr<BTreeNS::BTree> tree) {
+void graphViz(std::shared_ptr<BTreeNS::BTree> tree, int root) {
     std::stringstream label;
+    if (root == -1) root = tree->metadata[3];
     label << "Elements: " << tree->metadata[0] << " "\
                 "/ Nodes: " << tree->metadata[1] << " "\
                 "/ Height: " << tree->metadata[2] << " "\
                 "/ Root: " << tree->metadata[3] << " ";
-    auto str = createDot(tree, label.str(), tree->metadata[3]);
+    auto str = createDot(tree, label.str(), root);
     std::ofstream file("gv.dot");
     file << str;
 //    system("\"C:\\Program Files (x86)\\Graphviz2.38\\bin\\dot.exe\" gv.dot -Tpng -o file.png | file.png");

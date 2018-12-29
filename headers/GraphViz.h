@@ -21,6 +21,6 @@ std::string getTreeLabel(std::shared_ptr <BTreeNS::BTreeNode> node);
 
 std::string createDot(std::shared_ptr <BTreeNS::BTree> tree, std::string label, int start);
 
-void graphViz(std::shared_ptr <BTreeNS::BTree> tree);
+void graphViz(std::shared_ptr <BTreeNS::BTree> tree, int root = -1);
 
 #endif //SBD2_GRAPHVIZ_H

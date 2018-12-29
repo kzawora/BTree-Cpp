@@ -1,4 +1,5 @@
 #include "../../headers/BTree.h"
+
 using namespace BTreeNS;
 
 // BTreeNode::
@@ -20,6 +21,7 @@ std::shared_ptr<BTreeNodeCell> BTreeNode::insert(std::shared_ptr<BTreeNodeCell> 
             return newCell;
         }
     }
+    return nullptr;
 }
 
 // TODO: test this
